@@ -57,35 +57,51 @@ button,.button{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-w
   </div>
   <label for="lesson">課次與課名</label>
   <input id="lesson" placeholder="例如：第四課 差不多先生傳">
-  <div class="links" style="margin-top:12px">
-   <a id="google" target="_blank" rel="noopener">Google 搜尋</a>
-   <a id="bing" target="_blank" rel="noopener">Bing 搜尋</a>
-   <a href="https://dict.concised.moe.edu.tw/" target="_blank" rel="noopener">教育部國語辭典</a>
-   <a href="https://dict.mini.moe.edu.tw/" target="_blank" rel="noopener">教育部國語小字典</a>
-  </div>
-  <button class="primary" id="searchBtn">依課名開啟公開搜尋</button>
-  <p class="note">說明：這個免費版只會開啟搜尋網站，不會自動讀取搜尋結果，也不會把 AI 生成內容冒充成課本來源。請自行確認來源是否與版本、冊別相符。</p>
+  <button class="primary" id="chatFromLessonBtn" type="button">用 ChatGPT 整理這一課</button>
+  <p class="note">按下後會自動組合上方版本、年級、課名與已貼上的課文，複製整理指令並開啟 ChatGPT。由於網站無法代替你送出 ChatGPT 訊息，仍需在 ChatGPT 貼上並按送出。</p>
  </section>
  <section class="panel no-print">
-  <h2>② 貼上課文或語詞</h2>
-  <label for="sourceText">課文內容（可選）</label>
-  <textarea id="sourceText" placeholder="找不到可靠課文時，可將課文貼在這裡；此頁不會自動分析課文。"></textarea>
+  <h2>② 匯入 ChatGPT 整理結果（免 API）</h2>
+  <p class="note">上方按鈕會準備整理指令並開啟 ChatGPT。整理完成後，複製 ChatGPT 的回答並貼到這裡匯入。</p>
+  <div class="actions">
+   <button class="secondary" id="copyPromptBtn" type="button">複製 ChatGPT 整理指令</button>
+   <a class="button secondary" href="https://chatgpt.com/" target="_blank" rel="noopener">開啟 ChatGPT</a>
+  </div>
+  <label for="chatResult">貼上 ChatGPT 整理結果</label>
+  <textarea id="chatResult" placeholder="把 ChatGPT 回覆貼在這裡。建議格式：詞語｜注音｜核對狀態，每行一筆。"></textarea>
+  <button class="primary" id="importChatBtn" type="button">解析並匯入詞語清單</button>
+  <p class="note">匯入時會優先讀取「詞語｜注音｜核對狀態」格式；若沒有分隔符號，則嘗試擷取每行第一個詞語。匯入後仍請人工核對。</p>
+ </section>
+ <section class="panel no-print">
+  <h2>③ 貼上課文或手動編輯語詞</h2>
+  <label for="sourceText">課文內容（貼上後可擷取候選詞語）</label>
+  <textarea id="sourceText" placeholder="貼上課文後，按「從課文擷取候選詞語」。系統會用離線文字規則找出 2–4 字詞語候選，需由你勾選確認。"></textarea>
   <label for="words">語詞清單</label>
-  <textarea id="words" placeholder="例如：傳記、寓言、諷刺、陝西省、傳記"></textarea>
+  <textarea id="words" placeholder="候選詞語或已確認清單，例如：傳記、寓言、諷刺、陝西省"></textarea>
+  <div class="actions">
+   <button class="secondary" id="extractBtn" type="button">從課文擷取候選詞語</button>
+   <button class="secondary" id="clearCandidatesBtn" type="button">清除候選結果</button>
+  </div>
+  <div id="candidatePanel" class="panel" style="display:none;margin:12px 0 0;padding:12px;background:#f9fbf9">
+   <strong>課文候選詞語（請自行勾選確認）</strong>
+   <p id="candidateInfo" class="note">候選詞語只由文字規則擷取，不代表課本正式詞語或注音已驗證。</p>
+   <div id="candidates"></div>
+   <button class="primary" id="addCandidatesBtn" type="button">加入勾選詞語到清單</button>
+  </div>
   <div class="row">
    <div><label for="mode">整理模式</label><select id="mode"><option>課本正式語詞</option><option>考試補充語詞</option><option>課本正式語詞＋考試補充語詞</option></select></div>
    <div><label for="cols">列印欄數</label><select id="cols"><option value="1">1 欄</option><option value="2" selected>2 欄</option><option value="3">3 欄</option></select></div>
   </div>
   <label for="title">列印標題</label><input id="title" placeholder="例如：國中國文第四課語詞">
   <button class="primary" id="makeBtn">整理語詞並預覽</button>
-  <p class="note">此版本可去除重複語詞並列印；不會自動從課文抽詞、產生注音或驗證多音字。請將已確認的語詞放進語詞清單。</p>
+  <p class="note">可從貼上的課文擷取候選詞語、勾選後匯入清單、去除重複並列印。候選擷取是離線規則，可能漏詞或誤選；不會自動產生或驗證注音。</p>
  </section>
  <section class="panel print-panel">
   <div id="printTitle" style="display:none"></div><div id="printMeta" style="display:none"></div>
   <div class="no-print">
-   <h2>③ 預覽與列印</h2><p id="count" class="note">尚未整理語詞。</p>
+   <h2>④ 預覽與列印</h2><p id="count" class="note">尚未整理語詞。</p>
    <div class="actions"><button class="secondary" id="copyBtn">複製整理後語詞</button><button class="primary" id="printBtn" style="width:auto;margin:0">列印／存成 PDF</button></div>
-   <p class="note">這是獨立測試版，列印版面與原本 v0 專案不保證完全一致；請勿用它取代原版。</p>
+   <p class="note">此為獨立測試版，列印版面與原本 v0 專案不保證完全一致；原版請保留不動。</p>
   </div>
   <div id="preview" class="wordlist" style="--cols:2"></div>
  </section>
@@ -93,33 +109,66 @@ button,.button{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-w
 <script>
 (()=> {
  const $=id=>document.getElementById(id);
- const makeSearch=()=>{
-  const q=[$('edition').value.trim(),$('grade').value.trim(),$('lesson').value.trim(),'課文 語詞'].filter(Boolean).join(' ');
-  if(!q){alert('請先輸入課名或版本資訊');return;}
-  const enc=encodeURIComponent(q);
-  $('google').href='https://www.google.com/search?q='+enc;
-  $('bing').href='https://www.bing.com/search?q='+enc;
-  window.open('https://www.google.com/search?q='+enc,'_blank','noopener');
+ const stop=new Set(('我們 你們 他們 她們 這個 那個 一個 一些 因為 所以 但是 然而 如果 雖然 以及 並且 而且 於是 於是乎 這樣 那樣 自己 大家 什麼 怎麼 為什麼 可以 可能 已經 仍然 非常 比較 不是 沒有 進行 發生 看到 聽到 覺得 以為 開始 後來 當時 時候 地方 東西 事情 人們 生活 學生 老師 課文 作者 文章 這篇 那篇').split(/\s+/));
+ const chineseRuns=text=>(text.match(/[\u3400-\u9fff]+/g)||[]);
+ const uniqueWords=()=>{const raw=$('words').value.split(/[、，,；;\n\r\t]+/).map(x=>x.trim()).filter(Boolean);const seen=new Set();return raw.filter(w=>{if(seen.has(w))return false;seen.add(w);return true;});};
+ const render=()=>{const list=uniqueWords(),box=$('preview');box.innerHTML='';$('count').textContent=list.length?`共 ${list.length} 個不重複語詞；模式：${$('mode').value}`:'尚未整理語詞。';$('printTitle').textContent=$('title').value.trim()||'語詞簿';$('printMeta').textContent=`共 ${list.length} 個語詞｜${$('mode').value}`;document.documentElement.style.setProperty('--cols',$('cols').value);list.forEach(w=>{const d=document.createElement('div');d.className='word';d.textContent=w;box.appendChild(d);});};
+ const makePrompt=()=>{
+  const edition=$('edition').value.trim(),grade=$('grade').value.trim(),lesson=$('lesson').value.trim(),source=$('sourceText').value.trim();
+  return `請協助整理國中國文課程語詞。
+版本／出版社：${edition||'未提供'}
+年級與冊別：${grade||'未提供'}
+課次與課名：${lesson||'未提供'}
+
+整理規則：
+1. 若有提供課文，依課文整理適合國中生學習的重點語詞；不要把所有連續字串都當成詞語。
+2. 去除重複詞語並保留合理順序。
+3. 每個詞語附上注音；多音字依詞義判斷。無法確定時標示「待核對」，不要猜測。
+4. 不要把未查證內容說成課本正式詞語；無法確認的來源請註明。
+5. 請只輸出固定格式，每行一筆：詞語｜注音｜核對狀態。不要輸出表格、前言或結論。
+
+課文內容：
+${source||'（尚未提供課文，請先詢問我提供課文或照片文字）'}`;
  };
- const words=()=>{
-  const raw=$('words').value.split(/[、，,；;\n\r\t]+/).map(x=>x.trim()).filter(Boolean);
-  const seen=new Set();return raw.filter(w=>{if(seen.has(w))return false;seen.add(w);return true;});
+ const copyPrompt=async()=>{const prompt=makePrompt();try{await navigator.clipboard.writeText(prompt);alert('整理指令與目前課文已複製。請切換到 ChatGPT，貼上並送出。');}catch(e){promptFallback(prompt);}};
+ $('chatFromLessonBtn').addEventListener('click',async()=>{await copyPrompt();window.open('https://chatgpt.com/','_blank','noopener');});
+ const promptFallback=text=>{const w=window.open('','_blank');if(w){w.document.write('<meta name="viewport" content="width=device-width"><title>複製整理指令</title><p>請長按下方文字並複製，再貼到 ChatGPT。</p><textarea style="width:100%;height:75vh;font-size:16px"></textarea>');w.document.querySelector('textarea').value=text;}else{window.prompt('請長按複製以下指令，再貼到 ChatGPT',text);}};
+ const importChat=()=>{
+  const raw=$('chatResult').value.trim();if(!raw){alert('請先貼上 ChatGPT 的整理結果');return;}
+  const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);const parsed=[];
+  for(const line of lines){
+   if(/^(詞語|語詞|word)\s*[｜|、,，：:]/i.test(line))continue;
+   let word='';
+   if(/[｜|]/.test(line)) word=line.split(/[｜|]/)[0].trim();
+   else if(/[、，,；;]/.test(line)) word=line.split(/[、，,；;]/)[0].trim();
+   else word=line.replace(/^[-*•\d.、)）\s]+/,'').split(/\s+/)[0].trim();
+   word=word.replace(/^「|」$/g,'').replace(/^“|”$/g,'').trim();
+   if(word && word.length<=12 && /[\u3400-\u9fff]/.test(word) && !/^(待核對|核對狀態|注音|來源|備註)$/.test(word))parsed.push(word);
+  }
+  if(!parsed.length){alert('沒有辨識到詞語。請確認 ChatGPT 每行格式為「詞語｜注音｜核對狀態」。');return;}
+  const combined=[...$('words').value.split(/[、，,；;\n\r\t]+/).map(x=>x.trim()).filter(Boolean),...parsed];const seen=new Set();$('words').value=combined.filter(w=>{if(seen.has(w))return false;seen.add(w);return true;}).join('、');render();alert(`已匯入 ${parsed.length} 筆候選詞語，重複項目已去除。請檢查清單後再列印。`);$('chatResult').value='';
  };
- const render=()=>{
-  const list=words(), box=$('preview');box.innerHTML='';
-  $('count').textContent=list.length?`共 ${list.length} 個不重複語詞；模式：${$('mode').value}`:'尚未整理語詞。';
-  $('printTitle').textContent=$('title').value.trim()||'語詞簿';
-  $('printMeta').textContent=`共 ${list.length} 個語詞｜${$('mode').value}`;
-  document.documentElement.style.setProperty('--cols',$('cols').value);
-  list.forEach(w=>{const d=document.createElement('div');d.className='word';d.textContent=w;box.appendChild(d);});
+ const makeSearch=()=>{const q=[$('edition').value.trim(),$('grade').value.trim(),$('lesson').value.trim(),'課文 語詞'].filter(Boolean).join(' ');if(!q){alert('請先輸入課名或版本資訊');return;}const enc=encodeURIComponent(q);$('google').href='https://www.google.com/search?q='+enc;$('bing').href='https://www.bing.com/search?q='+enc;window.open('https://www.google.com/search?q='+enc,'_blank','noopener');};
+ const extract=()=>{
+  const text=$('sourceText').value.trim();if(!text){alert('請先貼上課文內容');return;}
+  const counts=new Map();
+  // Candidate extraction is intentionally transparent and offline: collect 2–4 character Chinese n-grams.
+  for(const run of chineseRuns(text)){
+   for(let n=2;n<=4;n++) for(let i=0;i<=run.length-n;i++){
+    const w=run.slice(i,i+n);if(stop.has(w)||/^(的|了|著|過|是|在|有|和|與|及|或|而|也|就|都|把|被|從|向|對|讓|給|又|更|很|最|才|再|還|所|之|其|而|則|因|故|若|如|但|卻|並|且|即|使|以|將|由|為|於|跟|到|去|來|上|下|中|前|後|內|外|他|她|它|我|你|們)+$/.test(w))continue;
+    counts.set(w,(counts.get(w)||0)+1);
+   }
+  }
+  const existing=new Set(uniqueWords());const ranked=[...counts.entries()].filter(([w,c])=>!existing.has(w)&&w.length>=2).sort((a,b)=>b[1]-a[1]||b[0].length-a[0].length||a[0].localeCompare(b[0],'zh-Hant')).slice(0,100);
+  const box=$('candidates');box.innerHTML='';$('candidatePanel').style.display='block';$('candidateInfo').textContent=`找到 ${ranked.length} 個候選（最多顯示 100 個）。這是字串切片候選，不是真正的中文斷詞；請只勾選有意義的詞語。`;
+  if(!ranked.length){box.textContent='沒有找到新候選詞語；你可以直接在下方語詞清單手動輸入。';return;}
+  ranked.forEach(([w,c],i)=>{const label=document.createElement('label');label.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 2px;margin:0;border-bottom:1px solid #e1e8e2;font-weight:400';const cb=document.createElement('input');cb.type='checkbox';cb.value=w;cb.style.cssText='width:20px;height:20px;flex:0 0 auto';cb.checked=c>1;const span=document.createElement('span');span.style.flex='1';span.textContent=w;const small=document.createElement('span');small.className='small';small.textContent=`出現 ${c} 次`;label.append(cb,span,small);box.appendChild(label);});
  };
- $('searchBtn').addEventListener('click',makeSearch);
- $('google').href='https://www.google.com/search?q='+encodeURIComponent('國中國文 課文 語詞');
- $('bing').href='https://www.bing.com/search?q='+encodeURIComponent('國中國文 課文 語詞');
- $('makeBtn').addEventListener('click',render);
- $('printBtn').addEventListener('click',()=>{render();window.print();});
- $('copyBtn').addEventListener('click',async()=>{const text=words().join('、');try{await navigator.clipboard.writeText(text);alert('已複製整理後語詞');}catch(e){prompt('請長按複製以下語詞',text);}});
- $('cols').addEventListener('change',render);
+ $('searchBtn').addEventListener('click',makeSearch);$('copyPromptBtn').addEventListener('click',copyPrompt);$('importChatBtn').addEventListener('click',importChat);
+ if($('google')) $('google').href='https://www.google.com/search?q='+encodeURIComponent('國中國文 課文 語詞');$('bing').href='https://www.bing.com/search?q='+encodeURIComponent('國中國文 課文 語詞');
+ $('extractBtn').addEventListener('click',extract);$('clearCandidatesBtn').addEventListener('click',()=>{$('candidatePanel').style.display='none';$('candidates').innerHTML='';});
+ $('addCandidatesBtn').addEventListener('click',()=>{const picked=[...$('candidates').querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value);if(!picked.length){alert('請先勾選要加入的詞語');return;}const current=$('words').value.split(/[、，,；;\n\r\t]+/).map(x=>x.trim()).filter(Boolean);$('words').value=[...current,...picked].join('、');render();alert(`已將 ${picked.length} 個候選加入語詞清單，並會在整理時去除重複。`);});
+ $('makeBtn').addEventListener('click',render);$('printBtn').addEventListener('click',()=>{render();window.print();});$('copyBtn').addEventListener('click',async()=>{const text=uniqueWords().join('、');try{await navigator.clipboard.writeText(text);alert('已複製整理後語詞');}catch(e){prompt('請長按複製以下語詞',text);}});$('cols').addEventListener('change',render);
 })();
 </script>
 </body>

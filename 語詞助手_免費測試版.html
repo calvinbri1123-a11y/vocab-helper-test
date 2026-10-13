@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>語詞助手｜免費測試版</title>
+<style>
+:root{--green:#3d6b55;--pale:#edf2ee;--line:#d5dfd8;--ink:#24312a}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f3;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",sans-serif}
+header{padding:22px 18px 12px;max-width:900px;margin:auto}
+h1{font-size:25px;margin:0 0 6px} p{line-height:1.6}
+main{max-width:900px;margin:auto;padding:8px 14px 30px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 2px 6px #0000000a}
+h2{font-size:18px;margin:0 0 14px}
+label{display:block;font-weight:650;margin:12px 0 7px}
+input,textarea,select{width:100%;font:inherit;padding:12px;border:1px solid #cbd7ce;border-radius:10px;background:#f9fbf9;color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button,.button{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
+.primary{background:var(--green);color:white;width:100%;margin-top:12px}
+.secondary{background:var(--pale);color:var(--green);border:1px solid var(--line)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{font-size:13px;color:#58685e;line-height:1.6}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{background:var(--pale);color:var(--green);padding:10px 12px;border-radius:9px;text-decoration:none}
+.status{padding:10px 12px;border-radius:10px;background:#f8f0e8;color:#7b4a28;line-height:1.6;margin-top:10px}
+.wordlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-top:1px solid #777;margin-top:10px}
+.word{padding:12px 8px;border:1px solid #777;border-top:0;min-height:44px;overflow-wrap:anywhere}
+.small{font-size:12px;color:#66736a}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ body{background:white;color:#000}
+ header,.no-print,.panel:not(.print-panel),.print-panel .no-print{display:none!important}
+ main{max-width:none;margin:0;padding:0}
+ .print-panel{border:0;box-shadow:none;border-radius:0;padding:0;margin:0}
+ #printTitle{display:block!important;text-align:center;font-size:18pt;margin:0 0 8mm}
+ #printMeta{display:block!important;text-align:center;font-size:10pt;margin-bottom:5mm}
+ .wordlist{grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));break-inside:auto}
+ .word{min-height:15mm;padding:4mm 3mm;font-size:14pt;break-inside:avoid}
+}
+@media(max-width:430px){.row{grid-template-columns:1fr}.wordlist{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+ <div class="small">IPHONE FRIENDLY · 免費流程測試</div>
+ <h1>語詞助手｜免費測試版</h1>
+ <p>先搜尋公開資料；若找不到可靠課文，再貼上課文或整理後的語詞。此版本不呼叫付費 AI API。</p>
+</header>
+<main>
+ <section class="panel no-print">
+  <h2>① 課名搜尋</h2>
+  <div class="row">
+   <div><label for="edition">出版社／版本</label><input id="edition" placeholder="例如：康軒"></div>
+   <div><label for="grade">年級與冊別</label><input id="grade" placeholder="例如：國中國文第四冊"></div>
+  </div>
+  <label for="lesson">課次與課名</label>
+  <input id="lesson" placeholder="例如：第四課 差不多先生傳">
+  <div class="links" style="margin-top:12px">
+   <a id="google" target="_blank" rel="noopener">Google 搜尋</a>
+   <a id="bing" target="_blank" rel="noopener">Bing 搜尋</a>
+   <a href="https://dict.concised.moe.edu.tw/" target="_blank" rel="noopener">教育部國語辭典</a>
+   <a href="https://dict.mini.moe.edu.tw/" target="_blank" rel="noopener">教育部國語小字典</a>
+  </div>
+  <button class="primary" id="searchBtn">依課名開啟公開搜尋</button>
+  <p class="note">說明：這個免費版只會開啟搜尋網站，不會自動讀取搜尋結果，也不會把 AI 生成內容冒充成課本來源。請自行確認來源是否與版本、冊別相符。</p>
+ </section>
+ <section class="panel no-print">
+  <h2>② 貼上課文或語詞</h2>
+  <label for="sourceText">課文內容（可選）</label>
+  <textarea id="sourceText" placeholder="找不到可靠課文時，可將課文貼在這裡；此頁不會自動分析課文。"></textarea>
+  <label for="words">語詞清單</label>
+  <textarea id="words" placeholder="例如：傳記、寓言、諷刺、陝西省、傳記"></textarea>
+  <div class="row">
+   <div><label for="mode">整理模式</label><select id="mode"><option>課本正式語詞</option><option>考試補充語詞</option><option>課本正式語詞＋考試補充語詞</option></select></div>
+   <div><label for="cols">列印欄數</label><select id="cols"><option value="1">1 欄</option><option value="2" selected>2 欄</option><option value="3">3 欄</option></select></div>
+  </div>
+  <label for="title">列印標題</label><input id="title" placeholder="例如：國中國文第四課語詞">
+  <button class="primary" id="makeBtn">整理語詞並預覽</button>
+  <p class="note">此版本可去除重複語詞並列印；不會自動從課文抽詞、產生注音或驗證多音字。請將已確認的語詞放進語詞清單。</p>
+ </section>
+ <section class="panel print-panel">
+  <div id="printTitle" style="display:none"></div><div id="printMeta" style="display:none"></div>
+  <div class="no-print">
+   <h2>③ 預覽與列印</h2><p id="count" class="note">尚未整理語詞。</p>
+   <div class="actions"><button class="secondary" id="copyBtn">複製整理後語詞</button><button class="primary" id="printBtn" style="width:auto;margin:0">列印／存成 PDF</button></div>
+   <p class="note">這是獨立測試版，列印版面與原本 v0 專案不保證完全一致；請勿用它取代原版。</p>
+  </div>
+  <div id="preview" class="wordlist" style="--cols:2"></div>
+ </section>
+</main>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id);
+ const makeSearch=()=>{
+  const q=[$('edition').value.trim(),$('grade').value.trim(),$('lesson').value.trim(),'課文 語詞'].filter(Boolean).join(' ');
+  if(!q){alert('請先輸入課名或版本資訊');return;}
+  const enc=encodeURIComponent(q);
+  $('google').href='https://www.google.com/search?q='+enc;
+  $('bing').href='https://www.bing.com/search?q='+enc;
+  window.open('https://www.google.com/search?q='+enc,'_blank','noopener');
+ };
+ const words=()=>{
+  const raw=$('words').value.split(/[、，,；;\n\r\t]+/).map(x=>x.trim()).filter(Boolean);
+  const seen=new Set();return raw.filter(w=>{if(seen.has(w))return false;seen.add(w);return true;});
+ };
+ const render=()=>{
+  const list=words(), box=$('preview');box.innerHTML='';
+  $('count').textContent=list.length?`共 ${list.length} 個不重複語詞；模式：${$('mode').value}`:'尚未整理語詞。';
+  $('printTitle').textContent=$('title').value.trim()||'語詞簿';
+  $('printMeta').textContent=`共 ${list.length} 個語詞｜${$('mode').value}`;
+  document.documentElement.style.setProperty('--cols',$('cols').value);
+  list.forEach(w=>{const d=document.createElement('div');d.className='word';d.textContent=w;box.appendChild(d);});
+ };
+ $('searchBtn').addEventListener('click',makeSearch);
+ $('google').href='https://www.google.com/search?q='+encodeURIComponent('國中國文 課文 語詞');
+ $('bing').href='https://www.bing.com/search?q='+encodeURIComponent('國中國文 課文 語詞');
+ $('makeBtn').addEventListener('click',render);
+ $('printBtn').addEventListener('click',()=>{render();window.print();});
+ $('copyBtn').addEventListener('click',async()=>{const text=words().join('、');try{await navigator.clipboard.writeText(text);alert('已複製整理後語詞');}catch(e){prompt('請長按複製以下語詞',text);}});
+ $('cols').addEventListener('change',render);
+})();
+</script>
+</body>
+</html>
